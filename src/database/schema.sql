@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS Usuario (
     estado BOOLEAN DEFAULT 1,
     fechaCreacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     Usuario TEXT UNIQUE NOT NULL,
-    Contrasena TEXT NOT NULL
+    Contrasena TEXT NOT NULL,
+    rol TEXT DEFAULT 'user' CHECK(rol IN ('admin', 'user'))
 );
 
 -- Tabla Session

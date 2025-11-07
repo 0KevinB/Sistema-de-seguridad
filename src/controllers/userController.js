@@ -17,7 +17,7 @@ class UserController {
    */
   async registro(req, res) {
     try {
-      const { nombres, apellidos, email, telefono } = req.body;
+      const { nombres, apellidos, email, telefono, rol } = req.body;
 
       // Validar datos
       const validacion = Usuario.validarDatos({ nombres, apellidos, email, telefono });
@@ -27,6 +27,14 @@ class UserController {
           success: false,
           mensaje: 'Datos inválidos',
           errores: validacion.errores
+        });
+      }
+
+      // Validar rol si se proporciona
+      if (rol && !['admin', 'user'].includes(rol)) {
+        return res.status(400).json({
+          success: false,
+          mensaje: 'Rol inválido. Debe ser "admin" o "user"'
         });
       }
 
@@ -40,8 +48,8 @@ class UserController {
         });
       }
 
-      // Registrar usuario
-      const nuevoUsuario = await Usuario.registro({ nombres, apellidos, email, telefono });
+      // Registrar usuario (por defecto será 'user' si no se especifica)
+      const nuevoUsuario = await Usuario.registro({ nombres, apellidos, email, telefono, rol });
 
       // Enviar credenciales por email
       await emailService.enviarCredenciales(
@@ -69,6 +77,7 @@ class UserController {
           usuario: nuevoUsuario.usuario,
           contrasena: nuevoUsuario.contrasenaTemp,
           email: nuevoUsuario.email,
+          rol: nuevoUsuario.rol,
           idMFA: mfa.idMFA,
           requiereValidacion: true
         }

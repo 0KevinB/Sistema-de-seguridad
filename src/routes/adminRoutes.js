@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../controllers/adminController');
-const { verificarAutenticacion } = require('../middleware/authMiddleware');
+const { verificarAutenticacion, verificarAdmin } = require('../middleware/authMiddleware');
 const { query, body } = require('express-validator');
 const { manejarErroresValidacion } = require('../middleware/validationMiddleware');
 
 /**
  * Rutas de administración
- * Todas requieren autenticación
+ * Todas requieren autenticación y rol de administrador
  */
 
-// Aplicar autenticación a todas las rutas de admin
+// Aplicar autenticación y verificación de admin a todas las rutas
 router.use(verificarAutenticacion);
+router.use(verificarAdmin);
 
 // Obtener registros de auditoría
 router.get('/auditoria',

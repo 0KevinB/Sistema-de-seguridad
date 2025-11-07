@@ -21,6 +21,7 @@ class AuthService {
       idUsuario: usuario.idUsuario,
       usuario: usuario.Usuario,
       email: usuario.email,
+      rol: usuario.rol || 'user',
       idSession: idSession
     };
 
@@ -166,6 +167,7 @@ class AuthService {
           apellidos: usuario.apellidos,
           email: usuario.email,
           telefono: usuario.telefono,
+          rol: usuario.rol || 'user',
           idSession: session.idSession
         }
       };

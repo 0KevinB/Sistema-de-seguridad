@@ -14,7 +14,7 @@ class Usuario {
    * @returns {Promise<Object>} Usuario creado con credenciales
    */
   static async registro(datos) {
-    const { nombres, apellidos, email, telefono } = datos;
+    const { nombres, apellidos, email, telefono, rol = 'user' } = datos;
 
     // Generar usuario automáticamente
     const usuario = generarUsuario(nombres, apellidos);
@@ -29,8 +29,8 @@ class Usuario {
     const contrasenaHash = await bcrypt.hash(contrasenaTemp, saltRounds);
 
     const sql = `
-      INSERT INTO Usuario (nombres, apellidos, email, telefono, Usuario, Contrasena, estado)
-      VALUES (?, ?, ?, ?, ?, ?, 0)
+      INSERT INTO Usuario (nombres, apellidos, email, telefono, Usuario, Contrasena, estado, rol)
+      VALUES (?, ?, ?, ?, ?, ?, 0, ?)
     `;
 
     try {
@@ -40,14 +40,16 @@ class Usuario {
         email,
         telefono,
         usuario,
-        contrasenaHash
+        contrasenaHash,
+        rol
       ]);
 
       return {
         idUsuario: result.lastID,
         usuario: usuario,
         contrasenaTemp: contrasenaTemp,
-        email: email
+        email: email,
+        rol: rol
       };
     } catch (error) {
       throw new Error(`Error al registrar usuario: ${error.message}`);
@@ -113,6 +115,11 @@ class Usuario {
     if (datos.estado !== undefined) {
       campos.push('estado = ?');
       valores.push(datos.estado);
+    }
+
+    if (datos.rol) {
+      campos.push('rol = ?');
+      valores.push(datos.rol);
     }
 
     if (campos.length === 0) {

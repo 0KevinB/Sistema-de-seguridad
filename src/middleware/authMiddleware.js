@@ -76,7 +76,40 @@ async function verificarAutenticacionOpcional(req, res, next) {
   }
 }
 
+/**
+ * Middleware para verificar que el usuario sea administrador
+ * Debe usarse después de verificarAutenticacion
+ */
+async function verificarAdmin(req, res, next) {
+  try {
+    // Verificar que el usuario esté autenticado
+    if (!req.usuario) {
+      return res.status(401).json({
+        success: false,
+        mensaje: 'Autenticación requerida'
+      });
+    }
+
+    // Verificar que el usuario tenga rol de admin
+    if (req.usuario.rol !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        mensaje: 'Acceso denegado. Se requieren privilegios de administrador'
+      });
+    }
+
+    next();
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      mensaje: 'Error al verificar permisos',
+      error: error.message
+    });
+  }
+}
+
 module.exports = {
   verificarAutenticacion,
-  verificarAutenticacionOpcional
+  verificarAutenticacionOpcional,
+  verificarAdmin
 };

@@ -19,7 +19,8 @@
       "Bash(npm run build:*)",
       "Bash(sqlite3:*)",
       "Bash(node migrate-mfa.js:*)",
-      "Bash(npm run dev)"
+      "Bash(npm run dev)",
+      "Bash(node migrate-roles.js:*)"
     ],
     "deny": [],
     "ask": []
