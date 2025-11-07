@@ -278,6 +278,52 @@ class AuthController {
       });
     }
   }
+
+  /**
+   * Obtener preguntas de seguridad de un usuario
+   * POST /api/auth/preguntas-seguridad
+   */
+  async obtenerPreguntasSeguridad(req, res) {
+    try {
+      const { idUsuario } = req.body;
+
+      const preguntas = await mfaService.obtenerPreguntasUsuario(idUsuario);
+
+      if (!preguntas || preguntas.length === 0) {
+        return res.status(404).json({
+          success: false,
+          mensaje: 'No hay preguntas de seguridad configuradas'
+        });
+      }
+
+      // Seleccionar 2 preguntas aleatorias si hay más de 2
+      let preguntasSeleccionadas = preguntas;
+      if (preguntas.length > 2) {
+        preguntasSeleccionadas = [];
+        const indices = [];
+        while (preguntasSeleccionadas.length < 2) {
+          const randomIndex = Math.floor(Math.random() * preguntas.length);
+          if (!indices.includes(randomIndex)) {
+            indices.push(randomIndex);
+            preguntasSeleccionadas.push(preguntas[randomIndex]);
+          }
+        }
+      }
+
+      res.json({
+        success: true,
+        preguntas: preguntasSeleccionadas.map(p => ({
+          idPregunta: p.idPregunta,
+          pregunta: p.pregunta
+        }))
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        mensaje: error.message
+      });
+    }
+  }
 }
 
 module.exports = new AuthController();

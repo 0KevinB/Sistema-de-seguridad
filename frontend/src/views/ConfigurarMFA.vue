@@ -11,6 +11,10 @@
         <h1 class="config-title">Configurar Autenticación Multi-Factor</h1>
         <p class="config-subtitle">Selecciona y configura tus métodos de verificación</p>
 
+        <div v-if="mensaje" class="alert" :class="mensaje.includes('✅') ? 'alert-success' : 'alert-error'">
+          {{ mensaje }}
+        </div>
+
         <div class="metodos-grid">
           <div class="metodo-card">
             <div class="metodo-header">
@@ -18,7 +22,7 @@
               <h3>Email</h3>
             </div>
             <p>Recibe códigos de verificación por correo electrónico</p>
-            <button class="btn-config">Configurar</button>
+            <button @click="configurarEmail" class="btn-config" :disabled="loading">Configurar</button>
           </div>
 
           <div class="metodo-card">
@@ -27,7 +31,7 @@
               <h3>SMS</h3>
             </div>
             <p>Recibe códigos de verificación por mensaje de texto</p>
-            <button class="btn-config">Configurar</button>
+            <button @click="configurarSMS" class="btn-config" :disabled="loading">Configurar</button>
           </div>
 
           <div class="metodo-card">
@@ -36,7 +40,9 @@
               <h3>Preguntas de Seguridad</h3>
             </div>
             <p>Responde preguntas de seguridad personalizadas</p>
-            <button class="btn-config">Configurar</button>
+            <button @click="configurarPreguntas" class="btn-config" :disabled="loading">
+              {{ loading ? 'Configurando...' : 'Configurar' }}
+            </button>
           </div>
 
           <div class="metodo-card">
@@ -45,7 +51,9 @@
               <h3>Dispositivo USB</h3>
             </div>
             <p>Usa un dispositivo USB como llave de seguridad</p>
-            <button class="btn-config">Configurar</button>
+            <button @click="configurarUSB" class="btn-config" :disabled="loading">
+              {{ loading ? 'Registrando...' : 'Configurar' }}
+            </button>
           </div>
         </div>
       </div>
@@ -54,7 +62,50 @@
 </template>
 
 <script setup>
-// Configuración básica
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/authStore'
+import userService from '../services/userService'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const mensaje = ref('')
+const loading = ref(false)
+
+const configurarPreguntas = () => {
+  router.push('/configurar-preguntas-mfa')
+}
+
+const configurarUSB = async () => {
+  loading.value = true
+  mensaje.value = ''
+
+  try {
+    const identificador = 'USB_' + Math.random().toString(36).substring(7)
+    const response = await userService.configurarMFA('usb', {
+      identificador,
+      nombre: 'Mi USB de Seguridad'
+    })
+
+    if (response.success) {
+      mensaje.value = `✅ Dispositivo USB registrado. Identificador: ${identificador}`
+    } else {
+      mensaje.value = '❌ Error al configurar: ' + response.mensaje
+    }
+  } catch (error) {
+    mensaje.value = '❌ Error: ' + (error.response?.data?.mensaje || error.message)
+  } finally {
+    loading.value = false
+  }
+}
+
+const configurarEmail = () => {
+  mensaje.value = '✅ El email ya está configurado automáticamente'
+}
+
+const configurarSMS = () => {
+  mensaje.value = '✅ El SMS ya está configurado automáticamente (requiere teléfono)'
+}
 </script>
 
 <style scoped>
@@ -164,7 +215,31 @@
   transition: transform 0.2s;
 }
 
-.btn-config:hover {
+.btn-config:hover:not(:disabled) {
   transform: translateY(-2px);
+}
+
+.btn-config:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alert {
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+.alert-success {
+  background: #c6f6d5;
+  color: #22543d;
+  border-left: 4px solid #48bb78;
+}
+
+.alert-error {
+  background: #fed7d7;
+  color: #c53030;
+  border-left: 4px solid #f56565;
 }
 </style>

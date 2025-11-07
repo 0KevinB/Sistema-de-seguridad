@@ -283,6 +283,60 @@ class UserController {
       });
     }
   }
+
+  /**
+   * Obtener sesiones del usuario
+   * GET /api/users/sesiones
+   */
+  async obtenerSesiones(req, res) {
+    try {
+      const Session = require('../models/Session');
+      const sesiones = await Session.obtenerSessionesPorUsuario(req.usuario.idUsuario);
+
+      res.json({
+        success: true,
+        sesiones: sesiones,
+        sessionActual: req.usuario.idSession
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        mensaje: error.message
+      });
+    }
+  }
+
+  /**
+   * Cerrar una sesión específica
+   * POST /api/users/sesiones/cerrar/:idSession
+   */
+  async cerrarSesionRemota(req, res) {
+    try {
+      const { idSession } = req.params;
+      const Session = require('../models/Session');
+      const Auditoria = require('../models/Auditoria');
+
+      // Verificar que la sesión pertenezca al usuario
+      const session = await Session.obtenerSessionActiva(req.usuario.idUsuario);
+
+      await Session.cerrarSession(idSession);
+
+      await Auditoria.generarRegistro(
+        req.usuario.idUsuario,
+        `SESION_CERRADA_REMOTA - idSession: ${idSession}`
+      );
+
+      res.json({
+        success: true,
+        mensaje: 'Sesión cerrada correctamente'
+      });
+    } catch (error) {
+      res.status(400).json({
+        success: false,
+        mensaje: error.message
+      });
+    }
+  }
 }
 
 module.exports = new UserController();

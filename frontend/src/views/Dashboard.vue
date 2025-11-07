@@ -1,12 +1,14 @@
 <template>
   <div class="dashboard">
+    <!-- Monitor de sesiones en tiempo real -->
+    <SessionMonitor />
+
     <nav class="navbar">
       <div class="nav-content">
         <h2 class="nav-title">Sistema de Seguridad</h2>
         <div class="nav-actions">
-          <span class="user-name">{{ authStore.currentUser?.nombre }}</span>
+          <span class="user-name">{{ authStore.currentUser?.nombres }} {{ authStore.currentUser?.apellidos }}</span>
           <router-link to="/perfil" class="nav-link">Mi Perfil</router-link>
-          <router-link v-if="authStore.currentUser?.rol === 'admin'" to="/admin" class="nav-link">Admin</router-link>
           <button @click="handleLogout" class="btn-logout">Cerrar Sesión</button>
         </div>
       </div>
@@ -14,7 +16,7 @@
 
     <div class="dashboard-content">
       <div class="welcome-card">
-        <h1 class="welcome-title">Bienvenido, {{ authStore.currentUser?.nombre }}</h1>
+        <h1 class="welcome-title">Bienvenido, {{ authStore.currentUser?.nombres }} {{ authStore.currentUser?.apellidos }}</h1>
         <p class="welcome-text">Has iniciado sesión exitosamente en el sistema de seguridad multi-factor.</p>
       </div>
 
@@ -36,10 +38,10 @@
         </div>
 
         <div class="info-card">
-          <div class="info-icon">🔐</div>
+          <div class="info-icon">📱</div>
           <div class="info-content">
-            <h3>Rol</h3>
-            <p>{{ authStore.currentUser?.rol || 'Usuario' }}</p>
+            <h3>Teléfono</h3>
+            <p>{{ authStore.currentUser?.telefono || 'No registrado' }}</p>
           </div>
         </div>
 
@@ -47,7 +49,7 @@
           <div class="info-icon">✅</div>
           <div class="info-content">
             <h3>Estado</h3>
-            <p>{{ authStore.currentUser?.activo ? 'Activo' : 'Inactivo' }}</p>
+            <p>Sesión Activa</p>
           </div>
         </div>
       </div>
@@ -64,11 +66,6 @@
             <span class="action-icon">🔐</span>
             <span class="action-text">Configurar MFA</span>
           </router-link>
-
-          <router-link v-if="authStore.currentUser?.rol === 'admin'" to="/admin" class="action-btn">
-            <span class="action-icon">⚙️</span>
-            <span class="action-text">Panel de Admin</span>
-          </router-link>
         </div>
       </div>
     </div>
@@ -78,6 +75,7 @@
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
+import SessionMonitor from '../components/SessionMonitor.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

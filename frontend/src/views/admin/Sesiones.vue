@@ -112,7 +112,18 @@ onMounted(() => {
 })
 
 const formatFecha = (fecha) => {
-  return new Date(fecha).toLocaleString('es-MX', {
+  if (!fecha) {
+    return 'N/A'
+  }
+
+  const date = new Date(fecha)
+
+  // Verificar si la fecha es válida
+  if (isNaN(date.getTime())) {
+    return 'Fecha inválida'
+  }
+
+  return date.toLocaleString('es-MX', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',

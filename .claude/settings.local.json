@@ -13,7 +13,13 @@
       "Bash(tree:*)",
       "Bash(if not exist views mkdir views)",
       "Bash(if not exist viewsadmin mkdir viewsadmin)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(echo:*)",
+      "Bash(\"C:\\Users\\kevin\\Documents\\Github\\Seguridad de la Informacion\\SistemaSeguridad\\frontend\\src\\style.css\")",
+      "Bash(npm run build:*)",
+      "Bash(sqlite3:*)",
+      "Bash(node migrate-mfa.js:*)",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []

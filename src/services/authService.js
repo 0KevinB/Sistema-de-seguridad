@@ -16,11 +16,12 @@ class AuthService {
    * @param {Object} usuario - Datos del usuario
    * @returns {string} Token JWT
    */
-  generarToken(usuario) {
+  generarToken(usuario, idSession = null) {
     const payload = {
       idUsuario: usuario.idUsuario,
       usuario: usuario.Usuario,
-      email: usuario.email
+      email: usuario.email,
+      idSession: idSession
     };
 
     return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -146,8 +147,8 @@ class AuthService {
       // Obtener datos del usuario
       const usuario = await Usuario.buscarPorId(idUsuario);
 
-      // Generar token JWT
-      const token = this.generarToken(usuario);
+      // Generar token JWT con idSession
+      const token = this.generarToken(usuario, session.idSession);
 
       await Auditoria.generarRegistro(
         idUsuario,
@@ -163,7 +164,9 @@ class AuthService {
           usuario: usuario.Usuario,
           nombres: usuario.nombres,
           apellidos: usuario.apellidos,
-          email: usuario.email
+          email: usuario.email,
+          telefono: usuario.telefono,
+          idSession: session.idSession
         }
       };
     } catch (error) {

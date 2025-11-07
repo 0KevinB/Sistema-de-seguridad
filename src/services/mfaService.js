@@ -269,6 +269,19 @@ class MFAService {
       throw new Error(`Error al obtener métodos: ${error.message}`);
     }
   }
+
+  /**
+   * Obtiene las preguntas de seguridad de un usuario
+   * @param {number} idUsuario - ID del usuario
+   * @returns {Promise<Array>}
+   */
+  async obtenerPreguntasUsuario(idUsuario) {
+    try {
+      return await PreguntasSeguridad.obtenerPreguntasPorUsuario(idUsuario);
+    } catch (error) {
+      throw new Error(`Error al obtener preguntas del usuario: ${error.message}`);
+    }
+  }
 }
 
 module.exports = new MFAService();

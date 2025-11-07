@@ -124,19 +124,18 @@ const handleRegistro = async () => {
 
     const response = await authStore.registro(datosRegistro)
 
-    if (response.success || response.datos) {
+    if (response.success) {
       registroExitoso.value = true
-      const data = response.datos || response
       credenciales.value = {
-        usuario: data.usuario,
-        contrasena: data.contrasena || 'Verifica tu email'
+        usuario: response.datos.usuario,
+        contrasena: response.datos.contrasena
       }
 
       // Guardar IDs para la validación
       localStorage.setItem('pendingValidation', JSON.stringify({
-        idUsuario: data.idUsuario,
-        idMFA: data.idMFA,
-        email: datosRegistro.email
+        idUsuario: response.datos.idUsuario,
+        idMFA: response.datos.idMFA,
+        email: response.datos.email
       }))
     } else {
       error.value = response.mensaje || 'Error al registrar usuario'

@@ -37,6 +37,12 @@ export default {
     return response.data
   },
 
+  // Obtener preguntas de seguridad de un usuario
+  async obtenerPreguntasSeguridad(idUsuario) {
+    const response = await api.post('/auth/preguntas-seguridad', { idUsuario })
+    return response.data
+  },
+
   // Validar preguntas de seguridad
   async validarPreguntas(idUsuario, respuestas) {
     const response = await api.post('/auth/mfa/preguntas/validar', { idUsuario, respuestas })

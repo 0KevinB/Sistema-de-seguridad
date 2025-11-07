@@ -76,10 +76,10 @@ const handleLogin = async () => {
         router.push('/dashboard')
       }
     } else {
-      error.value = response.message || 'Error al iniciar sesión'
+      error.value = response.mensaje || 'Error al iniciar sesión'
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al conectar con el servidor'
+    error.value = err.response?.data?.mensaje || 'Error al conectar con el servidor'
   } finally {
     loading.value = false
   }

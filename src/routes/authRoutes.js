@@ -52,6 +52,15 @@ router.post('/mfa/validar',
   authController.validarMFA
 );
 
+// Obtener preguntas de seguridad de un usuario
+router.post('/preguntas-seguridad',
+  [
+    body('idUsuario').isInt().withMessage('ID de usuario inválido')
+  ],
+  manejarErroresValidacion,
+  authController.obtenerPreguntasSeguridad
+);
+
 // Validar preguntas de seguridad
 router.post('/mfa/preguntas/validar',
   [

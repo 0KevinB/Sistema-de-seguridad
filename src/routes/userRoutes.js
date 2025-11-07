@@ -51,9 +51,9 @@ router.get('/perfil',
 router.put('/perfil',
   verificarAutenticacion,
   [
-    body('nombres').optional().isLength({ min: 2 }),
-    body('apellidos').optional().isLength({ min: 2 }),
-    body('telefono').optional().matches(/^\d{10}$/)
+    body('nombres').optional().isLength({ min: 2 }).withMessage('Nombres debe tener al menos 2 caracteres'),
+    body('apellidos').optional().isLength({ min: 2 }).withMessage('Apellidos debe tener al menos 2 caracteres'),
+    body('telefono').optional({ nullable: true, checkFalsy: true }).matches(/^\d{7,15}$/).withMessage('Teléfono debe tener entre 7 y 15 dígitos')
   ],
   manejarErroresValidacion,
   userController.actualizarPerfil
@@ -87,6 +87,18 @@ router.post('/mfa/configurar',
 router.get('/mfa/metodos',
   verificarAutenticacion,
   userController.obtenerMetodosMFA
+);
+
+// Obtener sesiones del usuario
+router.get('/sesiones',
+  verificarAutenticacion,
+  userController.obtenerSesiones
+);
+
+// Cerrar sesión remota
+router.post('/sesiones/cerrar/:idSession',
+  verificarAutenticacion,
+  userController.cerrarSesionRemota
 );
 
 module.exports = router;

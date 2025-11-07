@@ -13,6 +13,12 @@ export default {
     return response.data
   },
 
+  // Actualizar datos personales
+  async actualizarDatos(datos) {
+    const response = await api.put('/users/perfil', datos)
+    return response.data
+  },
+
   // Cambiar contraseña
   async cambiarContrasena(contrasenaActual, nuevaContrasena) {
     const response = await api.post('/users/cambiar-contrasena', {
@@ -31,6 +37,18 @@ export default {
   // Obtener métodos MFA
   async obtenerMetodosMFA() {
     const response = await api.get('/users/mfa/metodos')
+    return response.data
+  },
+
+  // Obtener sesiones del usuario
+  async obtenerSesiones() {
+    const response = await api.get('/users/sesiones')
+    return response.data
+  },
+
+  // Cerrar sesión remota
+  async cerrarSesionRemota(idSession) {
+    const response = await api.post(`/users/sesiones/cerrar/${idSession}`)
     return response.data
   }
 }

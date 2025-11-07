@@ -102,6 +102,27 @@ class PreguntasSeguridad {
   static obtenerPreguntasDisponibles() {
     return this.PREGUNTAS_DISPONIBLES;
   }
+
+  /**
+   * Obtiene las preguntas de seguridad configuradas por un usuario
+   * @param {number} idUsuario - ID del usuario
+   * @returns {Promise<Array>}
+   */
+  static async obtenerPreguntasPorUsuario(idUsuario) {
+    const sql = `
+      SELECT p.idPregunta, p.pregunta, p.idMFA
+      FROM PreguntasSeguridad p
+      INNER JOIN MFA m ON p.idMFA = m.idMFA
+      WHERE m.idUsuario = ? AND p.estado = 1 AND m.tipo = 'pregunta'
+      ORDER BY p.fechaCreacion DESC
+    `;
+
+    try {
+      return await database.all(sql, [idUsuario]);
+    } catch (error) {
+      throw new Error(`Error al obtener preguntas del usuario: ${error.message}`);
+    }
+  }
 }
 
 module.exports = PreguntasSeguridad;

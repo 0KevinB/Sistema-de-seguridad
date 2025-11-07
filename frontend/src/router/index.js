@@ -59,6 +59,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/configurar-preguntas-mfa',
+    name: 'ConfigurarPreguntasMFA',
+    component: () => import('../views/ConfigurarPreguntasMFA.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/admin',
     name: 'Admin',
     component: () => import('../views/Admin.vue'),

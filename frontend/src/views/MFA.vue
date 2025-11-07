@@ -120,15 +120,13 @@ const error = ref('')
 
 const form = ref({
   codigo: '',
-  identificadorUSB: ''
+  identificadorUSB: '',
+  idMFA: null
 })
 
-const preguntas = ref([
-  { pregunta: '¿Cuál es tu color favorito?' },
-  { pregunta: '¿En qué ciudad naciste?' }
-])
+const preguntas = ref([])
 
-const respuestas = ref(['', ''])
+const respuestas = ref([])
 
 onMounted(() => {
   if (!authStore.mfaData) {
@@ -143,9 +141,30 @@ const seleccionarMetodo = async (metodo) => {
   if (metodo === 'email' || metodo === 'sms') {
     try {
       loading.value = true
-      await authStore.solicitarCodigoMFA(metodo, authStore.mfaData.idUsuario)
+      const response = await authStore.solicitarCodigoMFA(metodo, authStore.mfaData.idUsuario)
+      if (response.success && response.idMFA) {
+        form.value.idMFA = response.idMFA
+      }
     } catch (err) {
       error.value = 'Error al enviar código'
+    } finally {
+      loading.value = false
+    }
+  } else if (metodo === 'preguntas') {
+    try {
+      loading.value = true
+      const authService = (await import('../services/authService')).default
+      const response = await authService.obtenerPreguntasSeguridad(authStore.mfaData.idUsuario)
+      if (response.success && response.preguntas) {
+        preguntas.value = response.preguntas
+        respuestas.value = new Array(response.preguntas.length).fill('')
+      } else {
+        error.value = 'No hay preguntas de seguridad configuradas'
+        metodoSeleccionado.value = null
+      }
+    } catch (err) {
+      error.value = err.response?.data?.mensaje || 'Error al cargar preguntas'
+      metodoSeleccionado.value = null
     } finally {
       loading.value = false
     }
@@ -156,7 +175,9 @@ const volverAMetodos = () => {
   metodoSeleccionado.value = null
   form.value.codigo = ''
   form.value.identificadorUSB = ''
-  respuestas.value = ['', '']
+  form.value.idMFA = null
+  respuestas.value = []
+  preguntas.value = []
   error.value = ''
 }
 
@@ -164,9 +185,15 @@ const validarCodigo = async () => {
   loading.value = true
   error.value = ''
 
+  if (!form.value.idMFA) {
+    error.value = 'Error: No se ha generado el código MFA'
+    loading.value = false
+    return
+  }
+
   try {
     const response = await authStore.validarMFA(
-      1, // ID del MFA (en producción esto vendría del backend)
+      form.value.idMFA,
       form.value.codigo,
       authStore.mfaData.idUsuario
     )
@@ -174,10 +201,10 @@ const validarCodigo = async () => {
     if (response.success) {
       router.push('/dashboard')
     } else {
-      error.value = response.message || 'Código inválido'
+      error.value = response.mensaje || 'Código inválido'
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al validar código'
+    error.value = err.response?.data?.mensaje || 'Error al validar código'
   } finally {
     loading.value = false
   }
@@ -188,18 +215,24 @@ const validarPreguntasHandler = async () => {
   error.value = ''
 
   try {
+    // Formatear respuestas con idPregunta
+    const respuestasFormateadas = preguntas.value.map((pregunta, index) => ({
+      idPregunta: pregunta.idPregunta,
+      respuesta: respuestas.value[index]
+    }))
+
     const response = await authStore.validarPreguntas(
       authStore.mfaData.idUsuario,
-      respuestas.value
+      respuestasFormateadas
     )
 
     if (response.success) {
       router.push('/dashboard')
     } else {
-      error.value = response.message || 'Respuestas incorrectas'
+      error.value = response.mensaje || 'Respuestas incorrectas'
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al validar respuestas'
+    error.value = err.response?.data?.mensaje || 'Error al validar respuestas'
   } finally {
     loading.value = false
   }
@@ -218,10 +251,10 @@ const validarUSBHandler = async () => {
     if (response.success) {
       router.push('/dashboard')
     } else {
-      error.value = response.message || 'Dispositivo no reconocido'
+      error.value = response.mensaje || 'Dispositivo no reconocido'
     }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Error al validar dispositivo'
+    error.value = err.response?.data?.mensaje || 'Error al validar dispositivo'
   } finally {
     loading.value = false
   }

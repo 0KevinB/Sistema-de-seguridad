@@ -82,7 +82,7 @@ class MFA {
   static async validarCodigo(idMFA, codigo) {
     const sql = `
       SELECT * FROM MFA
-      WHERE idMFA = ? AND codigo = ?
+      WHERE idMFA = ? AND codigo = ? AND (usado = 0 OR usado IS NULL)
     `;
 
     try {
@@ -100,8 +100,8 @@ class MFA {
         return false;
       }
 
-      // Eliminar el código usado
-      await database.run('DELETE FROM MFA WHERE idMFA = ?', [idMFA]);
+      // Marcar código como usado en lugar de eliminarlo
+      await database.run('UPDATE MFA SET usado = 1 WHERE idMFA = ?', [idMFA]);
 
       return true;
     } catch (error) {
@@ -138,6 +138,7 @@ class MFA {
       SELECT * FROM MFA
       WHERE idUsuario = ? AND tipo = ?
       AND fechaExpiracion > datetime('now')
+      AND (usado = 0 OR usado IS NULL)
       ORDER BY fechaExpiracion DESC
       LIMIT 1
     `;
@@ -159,6 +160,7 @@ class MFA {
       SELECT * FROM MFA
       WHERE idUsuario = ?
       AND fechaExpiracion > datetime('now')
+      AND (usado = 0 OR usado IS NULL)
       ORDER BY idMFA DESC
       LIMIT 1
     `;
